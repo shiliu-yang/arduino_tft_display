@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <TFT_eSPI.h> // Hardware-specific library
 
+#include "TuyaIoT.h"
 #include "TuyaIoTWeather.h"
 #include <Log.h>
 
@@ -31,9 +32,9 @@
 #define DISPLAY_PAGE_SWITCH   1
 #define DISPLAY_PAGE_MAX      2
 
-static DELAYED_WORK_HANDLE sg_workq_handle = NULL;
-
 // weather data
+#define WEATHER_UPDATE_SEC  (10*60)
+
 struct weather_data {
   uint32_t weather_index;
   int8_t cur_temp_high;
@@ -49,6 +50,9 @@ static struct weather_data sg_weather_data = {
   .real_feel = 23,
   .cur_humi = 62,
 };
+
+// work queue
+static DELAYED_WORK_HANDLE sg_workq_handle = NULL;
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -135,12 +139,6 @@ static void _display_weather_icon(uint32_t index)
 {
   const uint16_t *p_icon = NULL;
 
-  if (index == sg_last_weather_data.weather_index) {
-    return;
-  }
-
-  sg_last_weather_data.weather_index = index;
-
   switch (index) {
     case TW_WEATHER_SUNNY:
     case TW_WEATHER_MOSTLY_CLEAR:
@@ -174,12 +172,6 @@ static void _display_weather_icon(uint32_t index)
 
 static void _display_real_feel(int8_t temp)
 {
-  if (temp == sg_last_weather_data.real_feel) {
-    return;
-  }
-
-  sg_last_weather_data.real_feel = temp;
-
   tft.setTextColor(TFT_WHITE);
   tft.loadFont(GoogleSans_Regular32);
   tft.setCursor(135, 50);
@@ -193,13 +185,6 @@ static void _display_real_feel(int8_t temp)
 
 static void _display_temp(int8_t min, int8_t max)
 {
-  if (min == sg_last_weather_data.cur_temp_low && max == sg_last_weather_data.cur_temp_high) {
-    return;
-  }
-
-  sg_last_weather_data.cur_temp_low = min;
-  sg_last_weather_data.cur_temp_high = max;
-
   tft.setSwapBytes(true);
   uint16_t transp = 0x0000;
   tft.pushImage(15, 140, 36, 36, (uint16_t *)image_temp, transp);
@@ -216,12 +201,6 @@ static void _display_temp(int8_t min, int8_t max)
 
 static void _display_humi(int8_t humi)
 {
-  if (humi == sg_last_weather_data.cur_humi) {
-    return;
-  }
-
-  sg_last_weather_data.cur_humi = humi;
-
   tft.setSwapBytes(true);
   uint16_t transp = 0x0000;
   tft.pushImage(20, 140 + 36 + 20, 36, 36, (uint16_t *)image_humi, transp);
@@ -257,13 +236,70 @@ static void _display_screen_onoff(uint8_t onoff)
   return;
 }
 
-static void _app_display_weather(void)
+static void _app_display_weather(uint8_t force_refresh)
 {
+  static uint32_t update_cnt = 0;
+
   if (OPRT_OK != tal_time_check_time_sync()) {
     PR_DEBUG("time not sync");
     return;
   }
 
+  // network check
+  if (false == TuyaIoT.networkCheck()) {
+    PR_DEBUG("network not connect");
+    return;
+  }
+
+  if (0 == update_cnt) {
+    weatherUpdate();
+  }
+  update_cnt = (update_cnt + 1) % WEATHER_UPDATE_SEC;
+
+  if (force_refresh) {
+    sg_last_weather_data.weather_index = sg_weather_data.weather_index;
+    _display_weather_icon(sg_weather_data.weather_index);
+
+    sg_last_weather_data.real_feel = sg_weather_data.real_feel;
+    _display_real_feel(sg_weather_data.real_feel);
+
+    sg_last_weather_data.cur_temp_low = sg_weather_data.cur_temp_low;
+    sg_last_weather_data.cur_temp_high = sg_weather_data.cur_temp_high;
+    _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
+
+    sg_last_weather_data.cur_humi = sg_weather_data.cur_humi;
+    _display_humi(sg_weather_data.cur_humi);
+
+    return;
+  }
+
+  // weather icon
+  if (sg_weather_data.weather_index != sg_last_weather_data.weather_index) {
+    sg_last_weather_data.weather_index = sg_weather_data.weather_index;
+    _display_weather_icon(sg_weather_data.weather_index);
+  }
+
+  // real feel
+  if (sg_weather_data.real_feel != sg_last_weather_data.real_feel) {
+    sg_last_weather_data.real_feel = sg_weather_data.real_feel;
+    _display_real_feel(sg_weather_data.real_feel);
+  }
+
+  // today temperature range
+  if (sg_weather_data.cur_temp_low != sg_last_weather_data.cur_temp_low ||
+      sg_weather_data.cur_temp_high != sg_last_weather_data.cur_temp_high) {
+    sg_last_weather_data.cur_temp_low = sg_weather_data.cur_temp_low;
+    sg_last_weather_data.cur_temp_high = sg_weather_data.cur_temp_high;
+    _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
+  }
+
+  // humidity
+  if (sg_weather_data.cur_humi != sg_last_weather_data.cur_humi) {
+    sg_last_weather_data.cur_humi = sg_weather_data.cur_humi;
+    _display_humi(sg_weather_data.cur_humi);
+  }
+
+#if 0
   static uint32_t update_cnt = 10*60;
   if (update_cnt*1  >= 10*60) {
     update_cnt = 0;
@@ -275,6 +311,7 @@ static void _app_display_weather(void)
   _display_real_feel(sg_weather_data.real_feel);
   _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
   _display_humi(sg_weather_data.cur_humi);
+#endif
 }
 
 static uint8_t sg_display_page = 0;
@@ -283,16 +320,18 @@ static uint8_t sg_onoff = 0;
 
 static void _app_display_refresh(void *data)
 {
+  uint8_t force_refresh = 0;
   static uint8_t sg_last_page = sg_display_page;
 
   if (sg_last_page != sg_display_page) {
     tft.fillScreen(TFT_BLACK);
     sg_last_page = sg_display_page;
+    force_refresh = 1;
   }
 
   switch (sg_display_page) {
     case 0:
-      _app_display_weather();
+      _app_display_weather(force_refresh);
     break;
     case 1:
       _display_screen_onoff(sg_onoff);
