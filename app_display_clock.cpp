@@ -155,6 +155,11 @@ void app_display_colck(uint8_t is_first)
     last_minute_h = minute_h;
   }
 
+  if (is_first) {
+    // 冒号
+    drawColon(-4, 0, TEXT_BACKGROUND_COLOR);
+  }
+
   if (hour_l != last_hour_l) {
     // clear
     if (last_hour_l > 0) {

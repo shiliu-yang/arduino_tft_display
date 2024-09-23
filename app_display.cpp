@@ -37,6 +37,15 @@
 // weather data
 #define WEATHER_UPDATE_SEC  (10*60)
 
+// RGB 40, 52, 65
+#define SLATE_BLUE          (0x29A8)
+// RGB 255，255，224
+#define LIGHT_YELLOW        (0xFFFC)
+
+#define WEATHER_BACKGROUND  SLATE_BLUE
+
+#define SWITCH_BACKGROUND   LIGHT_YELLOW
+
 struct weather_data {
   uint32_t weather_index;
   int8_t cur_temp_high;
@@ -159,19 +168,16 @@ static void _display_weather_icon(uint32_t index)
     } break;
     case TW_WEATHER_PARTLY_CLOUDY:
     case TW_WEATHER_CLOUDY:
+    case TW_WEATHER_OVERCAST:
     {
       p_icon = image_cloudy;
     } break;
-    // case TW_WEATHER_OVERCAST:
-    // {
-    //   p_icon = image_overcast_sky;
-    // } break;
-    default : break;
+    default : return;
   }
 
   tft.setSwapBytes(true);
   uint16_t transp = 0x0000;
-  tft.fillRect(20, 10, 96, 96, TFT_BLACK);
+  tft.fillRect(20, 10, 96, 96, WEATHER_BACKGROUND);
   tft.pushImage(20, 10, 96, 96, (uint16_t *)p_icon, transp);
 }
 
@@ -182,8 +188,8 @@ static void _display_real_feel(int8_t temp)
   tft.setCursor(135, 50);
   char realFellString[6] = {0};
   snprintf(realFellString, 6, "%d°C", temp);
-  // tft.fillRect(135, 50, 96, 96, TFT_BLACK);
-  tft.fillRect(135, 50, 240-135, 32, TFT_BLACK);
+  // tft.fillRect(135, 50, 96, 96, WEATHER_BACKGROUND);
+  tft.fillRect(135, 50, 240-135, 32, WEATHER_BACKGROUND);
   tft.print(realFellString);
   tft.unloadFont();
 }
@@ -199,7 +205,7 @@ static void _display_temp(int8_t min, int8_t max)
   tft.setCursor(66, 140+12);
   char tempString[16] = {0};
   snprintf(tempString, 16, "%d°C ~ %d°C", min, max);
-  tft.fillRect(66, 140+12, 240-66, 18, TFT_BLACK);
+  tft.fillRect(66, 140+12, 240-66, 18, WEATHER_BACKGROUND);
   tft.print(tempString);
   tft.unloadFont();
 }
@@ -215,16 +221,21 @@ static void _display_humi(int8_t humi)
   tft.setCursor(20 + 36 + 10, 140 + 36 + 20+12);
   char humiString[8] = {0};
   snprintf(humiString, 10, "%d%%", humi);
-  tft.fillRect(66, 140 + 36 + 20+12, 240-66, 18, TFT_BLACK);
+  tft.fillRect(66, 140 + 36 + 20+12, 240-66, 18, WEATHER_BACKGROUND);
   tft.print(humiString);
   tft.unloadFont();
 }
 
-static void _display_screen_onoff(uint8_t onoff)
+static void _display_screen_onoff(uint8_t is_first, uint8_t onoff)
 {
-  static uint8_t _last_on_off = 2;
+  static uint8_t _last_on_off = 0xff;
 
   onoff = onoff ? 1 : 0;
+
+  if (is_first) {
+    tft.fillScreen(SWITCH_BACKGROUND);
+    _last_on_off = 0xff;
+  }
 
   const uint16_t *p_icon = onoff ? (image_turn_on) : (image_turn_off);
 
@@ -235,15 +246,25 @@ static void _display_screen_onoff(uint8_t onoff)
 
   tft.setSwapBytes(true);
   uint16_t transp = 0x0000;
-  tft.fillRect(80, 80, 80, 80, TFT_BLACK);
+  tft.fillRect(80, 80, 80, 80, SWITCH_BACKGROUND);
   tft.pushImage(80, 80, 80, 80, (uint16_t *)p_icon, transp);
 
   return;
 }
 
-static void _app_display_weather(uint8_t force_refresh)
+static void _app_display_weather(uint8_t is_first)
 {
   static uint32_t update_cnt = 0;
+
+  if (is_first) {
+    tft.fillScreen(WEATHER_BACKGROUND);
+
+    sg_last_weather_data.weather_index = 0xffffffff;
+    sg_last_weather_data.real_feel = 0xff;
+    sg_last_weather_data.cur_temp_low = 0xff;
+    sg_last_weather_data.cur_temp_high = 0xff;
+    sg_last_weather_data.cur_humi = 0xff;
+  }
 
   if (OPRT_OK != tal_time_check_time_sync()) {
     PR_DEBUG("time not sync");
@@ -261,22 +282,22 @@ static void _app_display_weather(uint8_t force_refresh)
   }
   update_cnt = (update_cnt + 1) % WEATHER_UPDATE_SEC;
 
-  if (force_refresh) {
-    sg_last_weather_data.weather_index = sg_weather_data.weather_index;
-    _display_weather_icon(sg_weather_data.weather_index);
+  // if (is_first) {
+  //   sg_last_weather_data.weather_index = sg_weather_data.weather_index;
+  //   _display_weather_icon(sg_weather_data.weather_index);
 
-    sg_last_weather_data.real_feel = sg_weather_data.real_feel;
-    _display_real_feel(sg_weather_data.real_feel);
+  //   sg_last_weather_data.real_feel = sg_weather_data.real_feel;
+  //   _display_real_feel(sg_weather_data.real_feel);
 
-    sg_last_weather_data.cur_temp_low = sg_weather_data.cur_temp_low;
-    sg_last_weather_data.cur_temp_high = sg_weather_data.cur_temp_high;
-    _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
+  //   sg_last_weather_data.cur_temp_low = sg_weather_data.cur_temp_low;
+  //   sg_last_weather_data.cur_temp_high = sg_weather_data.cur_temp_high;
+  //   _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
 
-    sg_last_weather_data.cur_humi = sg_weather_data.cur_humi;
-    _display_humi(sg_weather_data.cur_humi);
+  //   sg_last_weather_data.cur_humi = sg_weather_data.cur_humi;
+  //   _display_humi(sg_weather_data.cur_humi);
 
-    return;
-  }
+  //   return;
+  // }
 
   // weather icon
   if (sg_weather_data.weather_index != sg_last_weather_data.weather_index) {
@@ -303,20 +324,6 @@ static void _app_display_weather(uint8_t force_refresh)
     sg_last_weather_data.cur_humi = sg_weather_data.cur_humi;
     _display_humi(sg_weather_data.cur_humi);
   }
-
-#if 0
-  static uint32_t update_cnt = 10*60;
-  if (update_cnt*1  >= 10*60) {
-    update_cnt = 0;
-    weatherUpdate();
-  }
-  update_cnt++;
-
-  _display_weather_icon(sg_weather_data.weather_index);
-  _display_real_feel(sg_weather_data.real_feel);
-  _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
-  _display_humi(sg_weather_data.cur_humi);
-#endif
 }
 
 static uint8_t sg_display_page = 0;
@@ -325,24 +332,23 @@ static uint8_t sg_onoff = 0;
 
 static void _app_display_refresh(void *data)
 {
-  uint8_t force_refresh = 0;
+  uint8_t is_first = 0;
   static uint8_t sg_last_page = 0xff;
 
   if (sg_last_page != sg_display_page) {
-    // tft.fillScreen(TFT_BLACK); // TODO:
     sg_last_page = sg_display_page;
-    force_refresh = 1;
+    is_first = 1;
   }
 
   switch (sg_display_page) {
     case DISPLAY_PAGE_WEATHER:
-      _app_display_weather(force_refresh);
+      _app_display_weather(is_first);
     break;
     case DISPLAY_PAGE_SWITCH:
-      _display_screen_onoff(sg_onoff);
+      _display_screen_onoff(is_first, sg_onoff);
     break;
     case DISPLAY_PAGE_CLOCK:
-      app_display_colck(force_refresh);
+      app_display_colck(is_first);
     break;
     default : break;
   }
@@ -354,13 +360,14 @@ void app_display_init(void)
 
   tft.init();
   tft.setRotation(0);
-  // tft.fillScreen(TFT_BLACK); // TODO:
 
-#if 0
-  _display_weather_icon(sg_weather_data.weather_index);
-  _display_real_feel(sg_weather_data.real_feel);
-  _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
-  _display_humi(sg_weather_data.cur_humi);
+  sg_display_page = DISPLAY_PAGE_WEATHER;
+
+#if 1
+  // _display_weather_icon(sg_weather_data.weather_index);
+  // _display_real_feel(sg_weather_data.real_feel);
+  // _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
+  // _display_humi(sg_weather_data.cur_humi);
   // sg_display_page = 0;
 #else
   // _display_screen_onoff(0);
