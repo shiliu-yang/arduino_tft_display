@@ -1,7 +1,7 @@
 #include "app_display.h"
 
 #include <SPI.h>
-#include <TFT_eSPI.h> // Hardware-specific library
+#include <TFT_eSPI.h>
 
 #include "TuyaIoT.h"
 #include "TuyaIoTWeather.h"
@@ -10,6 +10,7 @@
 #include "image_cloudy.h"
 #include "image_light_rain.h"
 #include "image_sun.h"
+// #include "image_overcast_sky.h"
 
 #include "image_temp.h"
 #include "image_humi.h"
@@ -30,7 +31,8 @@
 
 #define DISPLAY_PAGE_WEATHER  0
 #define DISPLAY_PAGE_SWITCH   1
-#define DISPLAY_PAGE_MAX      2
+#define DISPLAY_PAGE_CLOCK    2
+#define DISPLAY_PAGE_MAX      3
 
 // weather data
 #define WEATHER_UPDATE_SEC  (10*60)
@@ -157,10 +159,13 @@ static void _display_weather_icon(uint32_t index)
     } break;
     case TW_WEATHER_PARTLY_CLOUDY:
     case TW_WEATHER_CLOUDY:
-    case TW_WEATHER_OVERCAST:
     {
       p_icon = image_cloudy;
     } break;
+    // case TW_WEATHER_OVERCAST:
+    // {
+    //   p_icon = image_overcast_sky;
+    // } break;
     default : break;
   }
 
@@ -321,20 +326,23 @@ static uint8_t sg_onoff = 0;
 static void _app_display_refresh(void *data)
 {
   uint8_t force_refresh = 0;
-  static uint8_t sg_last_page = sg_display_page;
+  static uint8_t sg_last_page = 0xff;
 
   if (sg_last_page != sg_display_page) {
-    tft.fillScreen(TFT_BLACK);
+    // tft.fillScreen(TFT_BLACK); // TODO:
     sg_last_page = sg_display_page;
     force_refresh = 1;
   }
 
   switch (sg_display_page) {
-    case 0:
+    case DISPLAY_PAGE_WEATHER:
       _app_display_weather(force_refresh);
     break;
-    case 1:
+    case DISPLAY_PAGE_SWITCH:
       _display_screen_onoff(sg_onoff);
+    break;
+    case DISPLAY_PAGE_CLOCK:
+      app_display_colck(force_refresh);
     break;
     default : break;
   }
@@ -346,18 +354,21 @@ void app_display_init(void)
 
   tft.init();
   tft.setRotation(0);
-  tft.fillScreen(TFT_BLACK);
+  // tft.fillScreen(TFT_BLACK); // TODO:
 
-#if 1
+#if 0
   _display_weather_icon(sg_weather_data.weather_index);
   _display_real_feel(sg_weather_data.real_feel);
   _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
   _display_humi(sg_weather_data.cur_humi);
   // sg_display_page = 0;
 #else
-  // _display_screen_onoff(1);
-  _display_screen_onoff(0);
-  sg_display_page = 1;
+  // _display_screen_onoff(0);
+  // sg_display_page = 1;
+
+  // DISPLAY_PAGE_CLOCK
+
+  sg_display_page = DISPLAY_PAGE_CLOCK;
 #endif
 
   rt = tal_workq_init_delayed(WORKQ_SYSTEM, _app_display_refresh, NULL, &sg_workq_handle);
