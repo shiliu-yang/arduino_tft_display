@@ -56,14 +56,23 @@ TuyaIoTWeatherClass TuyaWeather;
 
 static void weatherUpdate(void)
 {
+  int rt = OPRT_OK;
+
   PR_DEBUG("---> weather update");
+
+  int high = 0, low = 0;
+  rt = TuyaWeather.getTempHighLow(high, low);
+  if (OPRT_OK == rt) {
+    PR_DEBUG("high: %d, low: %d", high, low);
+    sg_weather_data.cur_temp_high = high;
+    sg_weather_data.cur_temp_low = low;
+  }
 
   String weather = TuyaWeather.get(0x0001);
   PR_DEBUG("weather: %s", weather.c_str());
 
   cJSON *root = cJSON_Parse(weather.c_str());
   if (!root) {
-    // fprintf(stderr, "Error before: [%s]\n", cJSON_GetErrorPtr());
     PR_ERR("cJSON_Parse fail");
     return;
   }
@@ -74,7 +83,6 @@ static void weatherUpdate(void)
     if (tempObj) {
       int temp = tempObj->valueint;
       PR_DEBUG("Temperature: %d\n", temp);
-      // sg_weather_data.
     }
 
     cJSON *humidityObj = cJSON_GetObjectItem(dataObj, "w.humidity");
