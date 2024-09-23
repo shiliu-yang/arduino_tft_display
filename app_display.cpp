@@ -273,7 +273,7 @@ static void _app_display_weather(void)
 
   _display_weather_icon(sg_weather_data.weather_index);
   _display_real_feel(sg_weather_data.real_feel);
-  _display_temp(sg_weather_data.cur_temp_high, sg_weather_data.cur_temp_low);
+  _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
   _display_humi(sg_weather_data.cur_humi);
 }
 
@@ -312,7 +312,7 @@ void app_display_init(void)
 #if 1
   _display_weather_icon(sg_weather_data.weather_index);
   _display_real_feel(sg_weather_data.real_feel);
-  _display_temp(sg_weather_data.cur_temp_high, sg_weather_data.cur_temp_low);
+  _display_temp(sg_weather_data.cur_temp_low, sg_weather_data.cur_temp_high);
   _display_humi(sg_weather_data.cur_humi);
   // sg_display_page = 0;
 #else
