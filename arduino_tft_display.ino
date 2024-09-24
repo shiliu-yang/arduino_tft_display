@@ -1,3 +1,5 @@
+#include "app_config.h"
+
 #include "Log.h"
 #include "Ticker.h"
 
@@ -5,7 +7,10 @@
 
 #include "app_tuya_iot.h"
 #include "app_button.h"
+
+#if ENABLE_APP_DISPLAY
 #include "app_display.h"
+#endif
 
 // Print free heap
 Ticker heapTicker;
@@ -24,11 +29,9 @@ void setup() {
 
   app_iot_init();
   app_button_init();
+#if ENABLE_APP_DISPLAY
   app_display_init();
-
-  // tft.setSwapBytes(true);
-  // uint16_t transp = 0x0000;
-  // tft.pushImage(0, 0, 240, 240, (uint16_t *)image_png1, transp);
+#endif
 }
 
 void loop() {

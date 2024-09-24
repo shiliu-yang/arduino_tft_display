@@ -1,8 +1,12 @@
+#include "app_config.h"
+
 #include "app_tuya_iot.h"
 
 #include "TuyaIoT.h"
 
+#if ENABLE_APP_DISPLAY
 #include "app_display.h"
+#endif
 
 // Tuya license
 #define TUYA_DEVICE_UUID    "uuidc0ce6be00a118b8b"
@@ -37,7 +41,9 @@ static void tuyaIoTEventCallback(tuya_event_msg_t *event)
           case DPID_SWITCH: {
             TuyaIoT.read(event, DPID_SWITCH, ledState);
             Serial.print("Receive DPID_SWITCH: "); Serial.println(ledState);
+#if ENABLE_APP_DISPLAY
             app_display_onoff_set(ledState);
+#endif
             TuyaIoT.write(DPID_SWITCH, ledState);
           } break;
           default : break;
