@@ -266,21 +266,24 @@ static void _app_display_weather(uint8_t is_first)
     sg_last_weather_data.cur_humi = 0xff;
   }
 
-  if (OPRT_OK != tal_time_check_time_sync()) {
-    PR_DEBUG("time not sync");
-    return;
-  }
+  // if (OPRT_OK != tal_time_check_time_sync()) {
+  //   PR_DEBUG("time not sync");
+  //   return;
+  // }
 
-  // network check
-  if (false == TuyaIoT.networkCheck()) {
-    PR_DEBUG("network not connect");
-    return;
-  }
+  // // network check
+  // if (false == TuyaIoT.networkCheck()) {
+  //   PR_DEBUG("network not connect");
+  //   return;
+  // }
 
-  if (0 == update_cnt) {
-    weatherUpdate();
+  // TODO: add last update time
+  if (OPRT_OK == tal_time_check_time_sync() && TuyaIoT.networkCheck()) {
+    if (0 == update_cnt) {
+      weatherUpdate();
+    }
+    update_cnt = (update_cnt + 1) % WEATHER_UPDATE_SEC;
   }
-  update_cnt = (update_cnt + 1) % WEATHER_UPDATE_SEC;
 
   // if (is_first) {
   //   sg_last_weather_data.weather_index = sg_weather_data.weather_index;
