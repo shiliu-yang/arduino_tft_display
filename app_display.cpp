@@ -1,3 +1,7 @@
+#include "app_config.h"
+
+#if ENABLE_APP_DISPLAY
+
 #include "app_display.h"
 
 #include <SPI.h>
@@ -430,3 +434,5 @@ void app_display_page_change(void)
   sg_display_page++;
   sg_display_page = sg_display_page % DISPLAY_PAGE_MAX;
 }
+
+#endif

@@ -1,3 +1,7 @@
+#include "app_config.h"
+
+#if ENABLE_APP_DISPLAY
+
 #include "app_display.h"
 
 #include "tal_time_service.h"
@@ -178,3 +182,5 @@ void app_display_colck(uint8_t is_first)
     last_hour_h = hour_h;
   }
 }
+
+#endif

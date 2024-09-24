@@ -12,6 +12,10 @@
 #include "app_display.h"
 #endif
 
+#if ENABLE_SMALL_DESKTOP_DISPLAY
+#include "SmallDesktopDisplay.h"
+#endif
+
 // Print free heap
 Ticker heapTicker;
 
@@ -27,15 +31,19 @@ void setup() {
 
   heapTicker.attach(5, heapCallback);
 
-  app_iot_init();
+  // app_iot_init();
   app_button_init();
 #if ENABLE_APP_DISPLAY
   app_display_init();
+#endif
+#if ENABLE_SMALL_DESKTOP_DISPLAY
+  SmallDesktopDisplaySetup();
 #endif
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   app_button_loop();
+  SmallDesktopDisplayLoop();
   delay(5);
 }
