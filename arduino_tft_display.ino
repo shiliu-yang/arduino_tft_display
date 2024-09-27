@@ -16,6 +16,8 @@
 #include "SmallDesktopDisplay.h"
 #endif
 
+#include "app_weather.h"
+
 // Print free heap
 Ticker heapTicker;
 
@@ -31,7 +33,7 @@ void setup() {
 
   heapTicker.attach(5, heapCallback);
 
-  // app_iot_init();
+  app_iot_init();
   app_button_init();
 #if ENABLE_APP_DISPLAY
   app_display_init();
@@ -39,11 +41,13 @@ void setup() {
 #if ENABLE_SMALL_DESKTOP_DISPLAY
   SmallDesktopDisplaySetup();
 #endif
+
+  app_weather_init(); // 需要 app_iot_init 后调用，app_iot_init 中会进行工作队列初始化
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   app_button_loop();
   SmallDesktopDisplayLoop();
-  delay(1);
+  delay(10);
 }

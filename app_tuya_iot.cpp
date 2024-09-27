@@ -70,5 +70,5 @@ void app_iot_init(void)
 
   TuyaIoT.setEventCallback(tuyaIoTEventCallback);
   // The "PROJECT_VERSION" comes from the "PROJECT_VERSION" field in "appConfig.json"
-  TuyaIoT.begin("wro3a8quan0jrmtd", PROJECT_VERSION);
+  TuyaIoT.begin("qhivvyqawogv04e4", PROJECT_VERSION);
 }
