@@ -421,9 +421,6 @@ void SmallDesktopDisplaySetup(void)
   tft.setRotation(0);
   tft.fillScreen(0x0000);
 
-  // memset(&weatherData, 0, sizeof(struct SmallDesktopWeather));
-  // memset(&weatherDataPrev, 0, sizeof(struct SmallDesktopWeather));
-
   weatherDataPrev.weatherCode = 0;
   weatherDataPrev.realFeel = 0;
   weatherDataPrev.humidity = 0;
@@ -464,8 +461,6 @@ void SmallDesktopDisplaySetup(void)
 
   //天气图标
   wrat.printfweather(170,15, 00);
-
-  // digitalClockDisplay(1);
 
   return;
 }

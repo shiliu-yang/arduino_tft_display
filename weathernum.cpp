@@ -8,7 +8,7 @@
 //显示天气图标
 void WeatherNum::printfweather(int numx,int numy,int numw)
 {
-  if(numw==00)
+  if(numw == 120 || numw == 146) // 晴天
   {
     TJpgDec.drawJpg(numx,numy,t0, sizeof(t0));
   }
