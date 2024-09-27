@@ -8,22 +8,22 @@
 //显示天气图标
 void WeatherNum::printfweather(int numx,int numy,int numw)
 {
-  if(numw == 120 || numw == 146) // 晴天
-  {
-    TJpgDec.drawJpg(numx,numy,t0, sizeof(t0));
-  }
-  else if(numw==01)
-  {
-    TJpgDec.drawJpg(numx,numy,t1, sizeof(t1));
-  }
-  else if(numw==02)
-  {
-    TJpgDec.drawJpg(numx,numy,t2, sizeof(t2));
-  }
-  else if(numw==03)
-  {
-    TJpgDec.drawJpg(numx,numy,t3, sizeof(t3));
-  }
+  // if(numw == 120 || numw == 146) // 晴天
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t0, sizeof(t0));
+  // }
+  // else if(numw==01)
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t1, sizeof(t1));
+  // }
+  // else if(numw==02)
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t2, sizeof(t2));
+  // }
+  // else if(numw==03)
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t3, sizeof(t3));
+  // }
   // else if(numw==04)
   // {
   //   TJpgDec.drawJpg(numx,numy,t4, sizeof(t4));
@@ -36,14 +36,14 @@ void WeatherNum::printfweather(int numx,int numy,int numw)
   // {
   //   TJpgDec.drawJpg(numx,numy,t6, sizeof(t6));
   // }
-  else if(numw==07||numw==8||numw==21||numw==22)
-  {
-    TJpgDec.drawJpg(numx,numy,t7, sizeof(t7));
-  }
-  else if(numw==9||numw==10||numw==23||numw==24)
-  {
-    TJpgDec.drawJpg(numx,numy,t9, sizeof(t9));
-  }
+  // else if(numw==07||numw==8||numw==21||numw==22)
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t7, sizeof(t7));
+  // }
+  // else if(numw==9||numw==10||numw==23||numw==24)
+  // {
+  //   TJpgDec.drawJpg(numx,numy,t9, sizeof(t9));
+  // }
   // else if(numw==11||numw==12||numw==25||numw==301)
   // {
   //   TJpgDec.drawJpg(numx,numy,t11, sizeof(t11));
@@ -92,10 +92,10 @@ void WeatherNum::printfweather(int numx,int numy,int numw)
   // {
   //   TJpgDec.drawJpg(numx,numy,t53, sizeof(t53));
   // }
-  else
-  {
+  // else
+  // {
     TJpgDec.drawJpg(numx,numy,t99, sizeof(t99));
-  }
+  // }
 
   
 }

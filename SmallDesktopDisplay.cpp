@@ -36,8 +36,8 @@ struct SmallDesktopWeather weatherData, weatherDataPrev;
 
 
 // #include "img/misaka.h"
-#include "img/temperature.h"
-#include "img/humidity.h"
+// #include "img/temperature.h"
+// #include "img/humidity.h"
 
 #define imgAst_EN 1
 #if imgAst_EN
@@ -446,9 +446,9 @@ void SmallDesktopDisplaySetup(void)
   TJpgDec.setCallback(tft_output);
 
   //温度
-  TJpgDec.drawJpg(15,183,temperature, sizeof(temperature));  //温度图标
-  //湿度
-  TJpgDec.drawJpg(15,213,humidity, sizeof(humidity));  //湿度图标
+  // TJpgDec.drawJpg(15,183,temperature, sizeof(temperature));  //温度图标
+  // //湿度
+  // TJpgDec.drawJpg(15,213,humidity, sizeof(humidity));  //湿度图标
 
   //左上角滚动字幕
   scrollText[0] = "实时天气 晴";

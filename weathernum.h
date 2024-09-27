@@ -3,15 +3,15 @@
 
 #include <TFT_eSPI.h> 
 
-#include "img/tianqi/t0.h"
-#include "img/tianqi/t1.h"
-#include "img/tianqi/t2.h"
-#include "img/tianqi/t3.h"
+// #include "img/tianqi/t0.h"
+// #include "img/tianqi/t1.h"
+// #include "img/tianqi/t2.h"
+// #include "img/tianqi/t3.h"
 // #include "img/tianqi/t4.h"
 // #include "img/tianqi/t5.h"
 // #include "img/tianqi/t6.h"
-#include "img/tianqi/t7.h"
-#include "img/tianqi/t9.h"
+// #include "img/tianqi/t7.h"
+// #include "img/tianqi/t9.h"
 // #include "img/tianqi/t11.h"
 // #include "img/tianqi/t13.h"
 // #include "img/tianqi/t14.h"
