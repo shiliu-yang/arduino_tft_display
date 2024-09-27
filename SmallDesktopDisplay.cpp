@@ -7,6 +7,8 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 
+#include "Log.h"
+
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite clk = TFT_eSprite(&tft);
 
@@ -23,7 +25,13 @@ WeatherNum  wrat;
 /* *****************************************************************
  *  字库、图片库
  * *****************************************************************/
-#include "font/ZdyLwFont_20.h"
+
+// chinese font
+// #include "font/ZdyLwFont_20.h"
+#include "font/simhei20.h"
+#define CHINESE_FONT simhei20
+
+
 // #include "img/misaka.h"
 #include "img/temperature.h"
 #include "img/humidity.h"
@@ -50,6 +58,8 @@ int AprevTime = 0;      //太空人更新时间记录
 //TFT屏幕输出函数
 bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
 {
+  // PR_DEBUG("x: %d, y: %d, w: %d, h: %d", x, y, w, h);
+
   if ( y >= tft.height() ) return 0;
   tft.pushImage(x, y, w, h, bitmap);
   // Return 1 to decode next block
@@ -95,7 +105,7 @@ void scrollBanner(){
     if(scrollText[currentIndex])
     {
       clkb.setColorDepth(8);
-      clkb.loadFont(ZdyLwFont_20);
+      clkb.loadFont(CHINESE_FONT);
       clkb.createSprite(150, 30); 
       clkb.fillSprite(BG_COLOR);
       clkb.setTextWrap(false);
@@ -152,7 +162,7 @@ void digitalClockDisplay(int reflash_en)
   if(reflash_en == 1) reflash_en = 0;
   /***日期****/
   clk.setColorDepth(8);
-  clk.loadFont(ZdyLwFont_20);
+  clk.loadFont(CHINESE_FONT);
    
   //星期
   clk.createSprite(58, 30);
@@ -180,7 +190,7 @@ void digitalClockDisplay(int reflash_en)
 void imgAnim()
 {
   int x=160,y=160;
-  if(millis() - AprevTime > 37) //x ms切换一次
+  if(millis() - AprevTime > 27) //x ms切换一次
   {
     Anim++;
     AprevTime = millis();
@@ -234,15 +244,10 @@ void astCallback() {
 
 void SmallDesktopDisplaySetup(void)
 {
-  // tft.init();
-  // tft.setRotation(0);
-  // tft.fillScreen(0x0000);
-
   tft.begin(); /* TFT init */
   tft.invertDisplay(1);//反转所有显示颜色：1反转，0正常
   tft.setRotation(0);
   tft.fillScreen(0x0000);
-  // tft.setTextColor(TFT_BLACK, BG_COLOR);
 
   TJpgDec.setJpgScale(1);
   TJpgDec.setSwapBytes(true);
@@ -250,7 +255,7 @@ void SmallDesktopDisplaySetup(void)
 
   /***绘制相关文字***/
   clk.setColorDepth(8);
-  clk.loadFont(ZdyLwFont_20);
+  clk.loadFont(CHINESE_FONT);
 
   //温度
   TJpgDec.drawJpg(15,183,temperature, sizeof(temperature));  //温度图标

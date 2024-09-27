@@ -45,5 +45,5 @@ void loop() {
   // put your main code here, to run repeatedly:
   app_button_loop();
   SmallDesktopDisplayLoop();
-  delay(5);
+  delay(1);
 }
