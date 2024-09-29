@@ -25,7 +25,7 @@
 // #include "img/tianqi/t30.h"
 // #include "img/tianqi/t31.h"
 // #include "img/tianqi/t53.h"
-#include "img/tianqi/t99.h"
+// #include "img/tianqi/t99.h"
 
 
 class WeatherNum

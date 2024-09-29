@@ -3,8 +3,6 @@
 
 #include "SmallDesktopDisplay.h"
 
-// #include "Ticker.h"
-
 #include <SPI.h>
 #include <TFT_eSPI.h>
 
@@ -18,8 +16,6 @@ TFT_eSprite clk = TFT_eSprite(&tft);
 #include "number.h"
 #include "weathernum.h"
 
-// Ticker Ticker;
-
 Number      dig;
 WeatherNum  wrat;
 
@@ -30,14 +26,11 @@ struct SmallDesktopWeather weatherData, weatherDataPrev;
  * *****************************************************************/
 
 // chinese font
-// #include "font/ZdyLwFont_20.h"
 #include "font/simhei20.h"
 #define CHINESE_FONT simhei20
 
-
-// #include "img/misaka.h"
-// #include "img/temperature.h"
-// #include "img/humidity.h"
+#include "img/temperature.h"
+#include "img/humidity.h"
 
 #define imgAst_EN 1
 #if imgAst_EN
@@ -96,15 +89,23 @@ void humidityWin(int8_t huminum, uint16_t humicol)
   clk.deleteSprite();
 }
 
-String scrollText[7];
+#define SCROLL_TEXT_NUM 2
+String scrollText[SCROLL_TEXT_NUM];
 int currentIndex = 0;
 TFT_eSprite clkb = TFT_eSprite(&tft);
 
 
 void scrollBanner(){
-  // if(millis() - prevTime > 2333) //3秒切换一次
-//  if(second()%2 ==0&& prevTime == 0)
-  // { 
+  static unsigned long _scrollBannerlastTime = 0;
+
+  if(millis() - _scrollBannerlastTime > 3*1000 || 0 == _scrollBannerlastTime) { //3秒切换一次
+    _scrollBannerlastTime = millis();
+    _scrollBannerlastTime = (_scrollBannerlastTime == 0) ? 1 : _scrollBannerlastTime;
+
+    // 滚动字幕更新
+    scrollText[0] = "最低温度 " + String(weatherData.lowTemp) + " ℃";
+    scrollText[1] = "最高温度 " + String(weatherData.highTemp) + " ℃";
+
     if(scrollText[currentIndex])
     {
       clkb.setColorDepth(8);
@@ -116,17 +117,14 @@ void scrollBanner(){
       clkb.setTextColor(TFT_WHITE, BG_COLOR); 
       clkb.drawString(scrollText[currentIndex],74, 16);
       clkb.pushSprite(10,45);
-       
+
       clkb.deleteSprite();
       clkb.unloadFont();
-      
-      if(currentIndex>=5)
-        currentIndex = 0;  //回第一个
-      else
-        currentIndex += 1;  //准备切换到下一个
+
+      currentIndex++;
+      currentIndex = currentIndex % SCROLL_TEXT_NUM;
     }
-    // prevTime = 1;
-  // }
+  }
 }
 
 uint8_t Hour = 0 , Minute = 0 , Second = 0;
@@ -187,55 +185,6 @@ void digitalClockDisplay(uint8_t month, uint8_t day, uint8_t week, uint8_t hour,
   }
 }
 
-// void digitalClockDisplay(int reflash_en)
-// { 
-//   int timey=82;
-//   if(hour!=Hour_sign || reflash_en == 1)//时钟刷新
-//   {
-//     dig.printfW3660(20,timey,hour/10);
-//     dig.printfW3660(60,timey,hour%10);
-//     Hour_sign = hour;
-//   }
-//   if(minute!=Minute_sign  || reflash_en == 1)//分钟刷新
-//   {
-//     dig.printfO3660(101,timey,minute/10);
-//     dig.printfO3660(141,timey,minute%10);
-//     Minute_sign = minute;
-//   }
-//   if(second!=Second_sign  || reflash_en == 1)//分钟刷新
-//   {
-//     dig.printfW1830(182,timey+30,second/10);
-//     dig.printfW1830(202,timey+30,second%10);
-//     Second_sign = second;
-//   }
-  
-//   if(reflash_en == 1) reflash_en = 0;
-//   /***日期****/
-//   clk.setColorDepth(8);
-//   clk.loadFont(CHINESE_FONT);
-
-//   //星期
-//   clk.createSprite(58, 30);
-//   clk.fillSprite(BG_COLOR);
-//   clk.setTextDatum(CC_DATUM);
-//   clk.setTextColor(TFT_WHITE, BG_COLOR);
-//   clk.drawString(week,29,16);
-//   clk.pushSprite(102,150);
-//   clk.deleteSprite();
-  
-//   //月日
-//   clk.createSprite(95, 30);
-//   clk.fillSprite(BG_COLOR);
-//   clk.setTextDatum(CC_DATUM);
-//   clk.setTextColor(TFT_WHITE, BG_COLOR);  
-//   clk.drawString(monthDay,49,16);
-//   clk.pushSprite(5,150);
-//   clk.deleteSprite();
-  
-//   clk.unloadFont();
-//   /***日期****/
-// }
-
 #if imgAst_EN
 void imgAnim()
 {
@@ -286,11 +235,6 @@ void imgAnim()
   }
 }
 #endif
-
-void astCallback() {
-  // PR_NOTICE("Free heap: %d", tal_system_get_free_heap_size());
-  imgAnim();
-}
 
 void TemperatureSet(int temperature)
 {
@@ -399,6 +343,20 @@ void aqiSet(int aqi)
   uint16_t pm25BgColor = tft.color565(156,202,127);//优
   String aqiTxt = "优";
 
+  if(aqi>200){
+    pm25BgColor = tft.color565(136,11,32);//重度
+    aqiTxt = "重度";
+  }else if(aqi>150){
+    pm25BgColor = tft.color565(186,55,121);//中度
+    aqiTxt = "中度";
+  }else if(aqi>100){
+    pm25BgColor = tft.color565(242,159,57);//轻
+    aqiTxt = "轻度";
+  }else if(aqi>50){
+    pm25BgColor = tft.color565(247,219,100);//良
+    aqiTxt = "良";
+  }
+
   clk.setColorDepth(8);
   clk.loadFont(CHINESE_FONT);
 
@@ -446,21 +404,18 @@ void SmallDesktopDisplaySetup(void)
   TJpgDec.setCallback(tft_output);
 
   //温度
-  // TJpgDec.drawJpg(15,183,temperature, sizeof(temperature));  //温度图标
-  // //湿度
-  // TJpgDec.drawJpg(15,213,humidity, sizeof(humidity));  //湿度图标
+  TJpgDec.drawJpg(15,183,temperature, sizeof(temperature));  //温度图标
+  //湿度
+  TJpgDec.drawJpg(15,213,humidity, sizeof(humidity));  //湿度图标
 
   //左上角滚动字幕
-  scrollText[0] = "实时天气 晴";
-  scrollText[1] = "空气质量 优";
-  scrollText[2] = "风向 西北风6级";
-  scrollText[3] = "今日 晴";
-  scrollText[4] = "最低温度 20 ℃";
-  scrollText[5] = "最高温度 26 ℃";
+  scrollText[0] = "最低温度 " + String(weatherData.lowTemp) + " ℃";
+  scrollText[1] = "最高温度 " + String(weatherData.highTemp) + " ℃";
+
   scrollBanner();
 
   //天气图标
-  wrat.printfweather(170,15, 00);
+  // wrat.printfweather(170,15, 140);
 
   return;
 }
@@ -480,10 +435,10 @@ void SmallDesktopDisplayLoop(void)
     digitalClockDisplay(Month, Day, Week, Hour, Minute, Second);
   }
 
-  // if (weatherData.weatherCode != weatherDataPrev.weatherCode) {
-  //   wrat.printfweather(170,15, weatherData.weatherCode);
-  //   weatherDataPrev.weatherCode = weatherData.weatherCode;
-  // }
+  if (weatherData.weatherCode != weatherDataPrev.weatherCode) {
+    wrat.printfweather(170,15, weatherData.weatherCode);
+    weatherDataPrev.weatherCode = weatherData.weatherCode;
+  }
 
   if (weatherData.realFeel != weatherDataPrev.realFeel) {
     TemperatureSet(weatherData.realFeel);
@@ -506,6 +461,8 @@ void SmallDesktopDisplayLoop(void)
   }
 
   imgAnim();
+
+  scrollBanner();
 
   return;
 }
