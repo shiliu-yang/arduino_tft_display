@@ -9,8 +9,8 @@
 #endif
 
 // Tuya license
-#define TUYA_DEVICE_UUID    "uuidc0ce6be00a118b8b"
-#define TUYA_DEVICE_AUTHKEY "nuoIWlGJAppAbPX5ONjc8hmVHsPNoCgd"
+#define TUYA_DEVICE_UUID    "uuidxxxxxxxxxxxxxxxx"
+#define TUYA_DEVICE_AUTHKEY "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 static void tuyaIoTEventCallback(tuya_event_msg_t *event)
 {
