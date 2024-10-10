@@ -94,8 +94,8 @@ String scrollText[SCROLL_TEXT_NUM];
 int currentIndex = 0;
 TFT_eSprite clkb = TFT_eSprite(&tft);
 
-
-void scrollBanner(){
+void scrollBanner(void)
+{
   static unsigned long _scrollBannerlastTime = 0;
 
   if(millis() - _scrollBannerlastTime > 3*1000 || 0 == _scrollBannerlastTime) { //3秒切换一次

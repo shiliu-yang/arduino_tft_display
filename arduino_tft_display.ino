@@ -45,9 +45,16 @@ void setup() {
   app_weather_init(); // 需要 app_iot_init 后调用，app_iot_init 中会进行工作队列初始化
 }
 
+uint32_t cnt = 0;
+
 void loop() {
   // put your main code here, to run repeatedly:
   app_button_loop();
   SmallDesktopDisplayLoop();
   delay(10);
+
+  cnt++;
+  if (cnt % 100 == 0) {
+    Serial.printf("cnt: %d\r\n", cnt);
+  }
 }
